@@ -29,9 +29,14 @@ orders/ - Order management
 4. Run migrations
 5. Start the server
 
+python manage.py runserver
+
+
 ## API Endpoints
 
-- /api/dealers/
-- /api/products/
-- /api/inventory/
-- /api/orders/
+| Endpoint | Description |
+|--------|-------------|
+| /api/dealers/ | Dealer management |
+| /api/products/ | Product management |
+| /api/inventory/ | Inventory management |
+| /api/orders/ | Order management |
