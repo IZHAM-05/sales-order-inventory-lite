@@ -55,13 +55,25 @@ class OrderItem(models.Model):
 
     unit_price = models.DecimalField(
         max_digits=10,
-        decimal_places=2
+        decimal_places=2,
+        editable=False
     )
 
     line_total = models.DecimalField(
         max_digits=12,
-        decimal_places=2
+        decimal_places=2,
+        editable=False
     )
+
+    def save(self, *args, **kwargs):
+
+        # take product price automatically
+        self.unit_price = self.product.price
+
+        # calculate line total
+        self.line_total = self.unit_price * self.quantity
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity}"

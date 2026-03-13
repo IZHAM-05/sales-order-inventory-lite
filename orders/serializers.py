@@ -1,18 +1,120 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
+from products.models import Product
+from inventory.models import Inventory
+from dealers.models import Dealer
+from django.db import transaction
+import random
+from datetime import datetime
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = "__all__"
+        fields = ["product", "quantity"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
 
-    items = OrderItemSerializer(many=True, read_only=True)
+    items = OrderItemSerializer(many=True)
 
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = [
+            "id",
+            "dealer",
+            "order_number",
+            "status",
+            "total_amount",
+            "created_at",
+            "updated_at",
+            "items"
+        ]
+
+        read_only_fields = [
+            "order_number",
+            "status",
+            "total_amount",
+            "created_at",
+            "updated_at"
+        ]
+
+
+    def create(self, validated_data):
+
+        items_data = validated_data.pop("items")
+
+        today = datetime.now().strftime("%Y%m%d")
+        random_number = random.randint(1000, 9999)
+
+        order_number = f"ORD-{today}-{random_number}"
+
+        order = Order.objects.create(
+            order_number=order_number,
+            status="draft",
+            total_amount=0,
+            **validated_data
+        )
+
+        total_amount = 0
+
+        for item in items_data:
+
+            product = item["product"]
+            quantity = item["quantity"]
+
+            inventory = Inventory.objects.get(product=product)
+
+            if inventory.quantity < quantity:
+                raise serializers.ValidationError(
+                    f"Insufficient stock for {product.name}"
+                )
+
+            unit_price = product.price
+
+            line_total = unit_price * quantity
+
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity,
+                unit_price=unit_price,
+                line_total=line_total
+            )
+
+            total_amount += line_total
+
+        order.total_amount = total_amount
+        order.save()
+
+        return order
+    
+
+    def validate(self, data):
+
+        if not self.initial_data.get("items"):
+            raise serializers.ValidationError("Order must contain at least one item")
+
+        return data
+    
+class PlaceOrderSerializer(serializers.Serializer):
+    
+
+    dealer = serializers.PrimaryKeyRelatedField(queryset=Dealer.objects.all())
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    quantity = serializers.IntegerField(min_value=1)
+
+    price = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        read_only=True
+    )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if instance and instance.get("product"):
+            representation["price"] = instance["product"].price
+
+        return representation
