@@ -107,6 +107,23 @@ Orders follow a strict lifecycle to ensure business reliability:
 
 ---
 
+# 🧪 API TESTING (cURL EXAMPLES)
+
+You can test the order actions using these terminal commands:
+
+**1. Confirm Order (Deduct Stock)**
+`curl -X POST http://127.0.0.1api/orders/1/confirm/`
+
+**2. Deliver Order**
+`curl -X POST http://127.0.0.1api/orders/1/deliver/`
+
+**3. Place Order (Directly)**
+`curl -X POST http://127.0.0.1api/orders/place_order/ -H "Content-Type: application/json" -d "{\"dealer\": 1, \"product\": 1, \"quantity\": 5}"`
+
+---
+
+
+
 # 👤 AUTHOR
 
 **Izham**
