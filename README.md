@@ -35,9 +35,10 @@ A B2B SaaS backend for auto parts distribution. This system handles dealer manag
 
 ## ⚙️ Project Setup
 
-### 1. Installation
+1. Installation
+
 ```bash
-git clone https://github.com
+git clone https://github.com/IZHAM-05/sales-order-inventory-lite
 cd sales-order-inventory-lite
 python -m venv venv
 
