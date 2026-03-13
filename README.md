@@ -2,8 +2,6 @@
 
 A B2B SaaS backend for auto parts distribution. This system handles dealer management, product catalogs, real-time inventory tracking, and a full sales order lifecycle.
 
-
-
 ## 🚀 Key Features & Business Rules
 
 ### 1. Advanced Inventory Control
@@ -22,8 +20,6 @@ A B2B SaaS backend for auto parts distribution. This system handles dealer manag
 
 ---
 
-
-
 ## 🛠️ Technical Stack
 - **Backend**: Python 3.12.9 + Django 6.0.3 + Django REST Framework
 - **Database**: SQLite (Configured for easy review/setup)
@@ -31,38 +27,28 @@ A B2B SaaS backend for auto parts distribution. This system handles dealer manag
 
 ---
 
-
-
 ## ⚙️ Project Setup
 
-1. Installation
-
+### 1. Installation
 ```bash
 git clone https://github.com/IZHAM-05/sales-order-inventory-lite
 cd sales-order-inventory-lite
 python -m venv venv
 
-
 # Windows:
 .\venv\Scripts\activate
 
 pip install -r requirements.txt
-
 python manage.py migrate
-
+Use code with caution.
 
 2. Running the Project
 bash
 python manage.py runserver
-
+Use code with caution.
 
 Access API at: 127.0.0.1
-
-
-
-
-📝 API Endpoints 
-
+📝 API Endpoints
 Method	Endpoint	Description
 GET	/api/products/	List all products with current stock levels
 POST	/api/dealers/	Register a new B2B dealer
@@ -70,25 +56,14 @@ POST	/api/orders/	Create a new Draft order
 POST	/api/orders/{id}/confirm/	Validate stock & move to Confirmed
 POST	/api/orders/{id}/deliver/	Finalize order status to Delivered
 PUT	/api/inventory/{product_id}/	Manual stock adjustment (Admin only)
-
-
-
-🧪 Test Scenarios Handled 
-
+🧪 Test Scenarios Handled
 Scenario A (Success): Create product (100 stock) → Create draft order (10 units) → Confirm → Stock drops to 90.
 Scenario B (Failure): Product has 5 units → Order requests 10 → Attempt to confirm → Returns 400 Error with stock details.
 Scenario C (Validation): Attempting to move an order from Delivered back to Draft is rejected.
-
-
-
-
-📂 Database Schema Design 
-
+📂 Database Schema Design
 Product: Catalog with unique SKU and current pricing.
 Inventory: 1:1 relationship with Product tracking quantity.
 Dealer: Customer information and unique identification.
 Order: Main tracking record with auto-numbering and total amount.
 OrderItem: Line items linking orders to products with "frozen" unit prices.
-
-
 Author: Izham | Vikmo Fresher Assignment - March 2026
