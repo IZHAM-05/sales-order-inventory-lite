@@ -1,148 +1,93 @@
-# Sales Order & Inventory Lite API
+# Vikmo - Sales Order & Inventory Lite
 
-This project is built using **Django** and **Django REST Framework**.  
-It provides a simple backend system to manage **dealers, products, inventory, and sales orders**.
+A B2B SaaS backend for auto parts distribution. This system handles dealer management, product catalogs, real-time inventory tracking, and a full sales order lifecycle.
 
-The system supports creating orders, confirming them based on stock availability, and delivering them while maintaining proper inventory control.
 
----
 
-# Features
+## 🚀 Key Features & Business Rules
 
-• Dealer Management API  
-• Product Management API  
-• Inventory Management  
-• Order Creation  
-• Order Confirmation with Stock Validation  
-• Order Delivery Workflow  
-• Automatic Order Number Generation  
-• Inventory Update on Order Confirmation  
+### 1. Advanced Inventory Control
+- **Stock Validation**: Orders are strictly validated against available stock. Attempting to confirm an order with insufficient stock results in a descriptive error: *"Insufficient stock for [Product]. Available: X, Requested: Y"*.
+- **Stock Deduction**: Inventory is only deducted when an order transitions from `Draft` → `Confirmed`.
+- **Race Condition Protection**: Uses `transaction.atomic()` and `select_for_update()` to ensure data integrity during high-concurrency order confirmations.
 
----
+### 2. Order Lifecycle Management
+- **Status Flow**: Enforces the strict progression: `Draft` → `Confirmed` → `Delivered`.
+- **Immutable Orders**: Once an order is `Confirmed` or `Delivered`, it is locked and cannot be modified, ensuring financial auditability.
+- **Price Preservation**: Captures the `unit_price` at the moment of order creation. Future price changes in the product catalog do not retroactively affect existing orders.
 
-# Tech Stack
-
-• Python  
-• Django  
-• Django REST Framework  
-• SQLite  
+### 3. Automated Logic
+- **Order Numbering**: Auto-generates unique IDs following the format: `ORD-YYYYMMDD-XXXX`.
+- **Calculations**: Automatically computes `line_total` (Quantity × Price) and `total_amount` for the entire order.
 
 ---
 
-# Project Structure
 
 
-dealers/ - Dealer APIs
-products/ - Product APIs
-inventory/ - Inventory management
-orders/ - Order management
-manage.py - Django project entry point
-
+## 🛠️ Technical Stack
+- **Backend**: Python 3.12.9 + Django 6.0.3 + Django REST Framework
+- **Database**: SQLite (Configured for easy review/setup)
+- **API Design**: RESTful JSON APIs
 
 ---
 
-# How to Run the Project
-
-### 1. Clone the Repository
 
 
-git clone <your-repository-url>
+## ⚙️ Project Setup
 
-
-### 2. Navigate to the Project Folder
-
-
+### 1. Installation
+```bash
+git clone https://github.com
 cd sales-order-inventory-lite
-
-
-### 3. Create Virtual Environment
-
-
 python -m venv venv
 
 
-### 4. Activate Virtual Environment
-
-Windows
-
-
-venv\Scripts\activate
-
-
-Mac / Linux
-
-
-source venv/bin/activate
-
-
-### 5. Install Dependencies
-
+# Windows:
+.\venv\Scripts\activate
 
 pip install -r requirements.txt
 
-
-### 6. Run Database Migrations
-
-
-python manage.py makemigrations
 python manage.py migrate
 
 
-### 7. Run the Development Server
-
-
+2. Running the Project
+bash
 python manage.py runserver
 
 
-Server will start at:
+Access API at: 127.0.0.1
 
 
-http://127.0.0.1:8000/
 
 
----
+📝 API Endpoints 
 
-# API Endpoints
-
-| Endpoint | Description |
-|--------|--------|
-| /api/dealers/ | Dealer management |
-| /api/products/ | Product management |
-| /api/inventory/ | Inventory management |
-| /api/orders/ | Order management |
-
----
-
-# Order Workflow
-
-Orders follow this lifecycle:
+Method	Endpoint	Description
+GET	/api/products/	List all products with current stock levels
+POST	/api/dealers/	Register a new B2B dealer
+POST	/api/orders/	Create a new Draft order
+POST	/api/orders/{id}/confirm/	Validate stock & move to Confirmed
+POST	/api/orders/{id}/deliver/	Finalize order status to Delivered
+PUT	/api/inventory/{product_id}/	Manual stock adjustment (Admin only)
 
 
-Draft → Confirmed → Delivered
+
+🧪 Test Scenarios Handled 
+
+Scenario A (Success): Create product (100 stock) → Create draft order (10 units) → Confirm → Stock drops to 90.
+Scenario B (Failure): Product has 5 units → Order requests 10 → Attempt to confirm → Returns 400 Error with stock details.
+Scenario C (Validation): Attempting to move an order from Delivered back to Draft is rejected.
 
 
-Rules:
 
-• Orders are created in **Draft** status  
-• Only **Draft orders** can be edited  
-• Order confirmation checks **inventory availability**  
-• If stock is insufficient, confirmation fails  
-• Confirmed orders cannot be modified  
-• Delivered orders mark completion of the order  
 
----
+📂 Database Schema Design 
 
-# Example Order Flow
+Product: Catalog with unique SKU and current pricing.
+Inventory: 1:1 relationship with Product tracking quantity.
+Dealer: Customer information and unique identification.
+Order: Main tracking record with auto-numbering and total amount.
+OrderItem: Line items linking orders to products with "frozen" unit prices.
 
-1. Create Product  
-2. Add Inventory Stock  
-3. Create Dealer  
-4. Place Order  
-5. Confirm Order (stock deducted)  
-6. Deliver Order  
 
----
-
-# Author
-
-Izham
+Author: Izham | Vikmo Fresher Assignment - March 2026
