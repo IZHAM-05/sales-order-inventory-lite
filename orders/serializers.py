@@ -97,6 +97,32 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Order must contain at least one item")
 
         return data
+
+
+    def update(self, instance, validated_data):
+        # 1. Pop the nested items data
+        items_data = validated_data.pop('items', None)
+
+        # 2. Update the Order fields (like dealer, status, etc.)
+        # Using 'dealer' instead of 'customer'
+        instance.dealer = validated_data.get('dealer', instance.dealer)
+        instance.status = validated_data.get('status', instance.status)
+        instance.order_number = validated_data.get('order_number', instance.order_number)
+        instance.save()
+
+        # 3. Handle nested OrderItems
+        if items_data is not None:
+            # Simple approach: clear old items and add new ones
+            instance.items.all().delete()
+            for item_data in items_data:
+                OrderItem.objects.create(order=instance, **item_data)
+            
+            # Optional: Recalculate total_amount here if needed
+                
+        return instance
+
+
+
     
 class PlaceOrderSerializer(serializers.Serializer):
     
